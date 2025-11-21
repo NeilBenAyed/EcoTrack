@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>EcoTrack - Données Air Quality</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 900px; margin: 50px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background: #27ae60; color: #fff; }
+        .nav { text-align: center; margin-bottom: 20px; }
+        .nav a { margin: 0 10px; color: #2980b9; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="login.html">Connexion</a>
+            <a href="upload.html">Upload CSV</a>
+            <a href="data.html">Données</a>
+        </div>
+        <h1>Données Air Quality</h1>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Ville</th>
+                    <th>Lieu</th>
+                    <th>Paramètre</th>
+                    <th>Valeur</th>
+                    <th>Unité</th>
+                    <th>Date (UTC)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <script>
+        async function fetchData() {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch('http://localhost:8000/air_quality/', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                const tbody = document.querySelector('#dataTable tbody');
+                tbody.innerHTML = '';
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.city}</td>
+                        <td>${row.location}</td>
+                        <td>${row.parameter}</td>
+                        <td>${row.value}</td>
+                        <td>${row.unit}</td>
+                        <td>${row.date_utc}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                document.querySelector('#dataTable tbody').innerHTML = '<tr><td colspan="6">Erreur ou accès non autorisé.</td></tr>';
+            }
+        }
+        fetchData();
+    </script>
+</body>
+</html>
